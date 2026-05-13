@@ -1,14 +1,70 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-// import './App.css'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import Projects from "./pages/Projects";
+import Tasks from "./pages/Tasks";
+
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
+
   return (
-    <div className="min-h-screen flex items-center justify-center text-3xl font-bold">
-      Team Task Manager
-    </div>
+    <BrowserRouter>
+
+      <Routes>
+
+        <Route
+          path="/"
+          element={<Navigate to="/login" />}
+        />
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/signup"
+          element={<Signup />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/projects"
+          element={
+            <ProtectedRoute>
+              <Projects />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute>
+              <Tasks />
+            </ProtectedRoute>
+          }
+        />
+
+      </Routes>
+
+    </BrowserRouter>
   );
 }
 
