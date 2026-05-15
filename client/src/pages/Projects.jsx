@@ -33,31 +33,30 @@ const Projects = () => {
     description: "",
   });
 
+  const [loading, setLoading] = useState(true);
+
   const submitLock = useRef(false);
 
-  const fetchProjects = async () => {
+const fetchProjects = async () => {
 
-    try {
+  try {
 
-      const res = await API.get("/api/projects");
+    setLoading(true);
 
-      const uniqueProjects = Array.from(
-        new Map(
-          (res.data.projects || []).map((project) => [
-            project._id,
-            project,
-          ])
-        ).values()
-      );
+    const res = await API.get("/api/projects");
 
-      setProjects(uniqueProjects);
+    setProjects(res.data.projects);
 
-    } catch (error) {
+  } catch (error) {
 
-      console.log(error);
+    console.log(error);
 
-    }
-  };
+  } finally {
+
+    setLoading(false);
+
+  }
+};
 
   const handleChange = (e) => {
 
@@ -136,6 +135,22 @@ const Projects = () => {
     fetchProjects();
 
   }, []);
+
+  if (loading) {
+  return (
+    <DashboardLayout>
+
+      <div className="flex items-center justify-center h-[60vh]">
+
+        <div className="text-zinc-500 text-lg font-medium">
+          Loading projects...
+        </div>
+
+      </div>
+
+    </DashboardLayout>
+  );
+}
 
   return (
     <DashboardLayout>
@@ -220,6 +235,7 @@ const Projects = () => {
         </div>
 
       )}
+      
 
       {/* PROJECT GRID */}
 
