@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   CalendarDays,
   CheckCircle2,
-  Clock3,
   Plus,
 } from "lucide-react";
 
@@ -33,14 +32,6 @@ const Tasks = () => {
     dueDate: "",
   });
 
-  useEffect(() => {
-
-    fetchTasks();
-
-    fetchProjects();
-
-  }, []);
-
   const fetchTasks = async () => {
 
     try {
@@ -62,7 +53,16 @@ const Tasks = () => {
 
       const res = await API.get("/api/projects");
 
-      setProjects(res.data.projects);
+      const uniqueProjects = Array.from(
+        new Map(
+          (res.data.projects || []).map((project) => [
+            project._id,
+            project,
+          ])
+        ).values()
+      );
+
+      setProjects(uniqueProjects);
 
     } catch (error) {
 
@@ -70,6 +70,14 @@ const Tasks = () => {
 
     }
   };
+
+  useEffect(() => {
+
+    fetchTasks();
+
+    fetchProjects();
+
+  }, []);
 
   const handleChange = (e) => {
 

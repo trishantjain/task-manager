@@ -4,6 +4,7 @@ const {
   createProject,
   getProjects,
   addMember,
+  deleteProject,
 } = require("../controllers/projectController");
 
 const protect = require("../middleware/authMiddleware");
@@ -35,6 +36,13 @@ router.put(
   protect,
   authorizeRoles("admin"),
   addMember
+);
+
+router.delete(
+  "/:id",
+  protect,
+  authorizeRoles("admin"),
+  deleteProject
 );
 
 module.exports = router;

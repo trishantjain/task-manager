@@ -14,6 +14,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
 
@@ -27,6 +28,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setLoading(true);
+
     try {
 
       const res = await API.post(
@@ -37,13 +40,14 @@ const Login = () => {
       login(res.data);
 
       navigate("/dashboard");
-
-    } catch (error) {
-
+    }
+    catch (error) {
       alert(
         error.response?.data?.message || "Login failed"
       );
-
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -79,21 +83,26 @@ const Login = () => {
 
         <button
           type="submit"
-          className="w-full bg-black text-white py-3 rounded"
+          disabled={loading}
+          className={`w-full py-3 rounded-2xl font-semibold transition-all
+                      ${loading
+              ? "bg-zinc-700 cursor-not-allowed opacity-70"
+              : "bg-black text-white cursor-pointer hover:scale-[1.01]"
+            }`}
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <p className="text-center text-zinc-500 mt-6">
 
           Don't have an account?
 
-          <span
-            onClick={() => navigate("/signup")}
-            className="text-black font-semibold cursor-pointer ml-2"
-          >
-            Signup
-          </span>
+<span
+  onClick={() => navigate("/signup")}
+  className="text-black font-semibold cursor-pointer ml-2 hover:underline"
+>
+  Signup
+</span>
 
         </p>
 

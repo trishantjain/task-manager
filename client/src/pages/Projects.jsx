@@ -1,9 +1,15 @@
-import { useContext, useEffect, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   FolderKanban,
   Plus,
   Users,
+  Trash2
 } from "lucide-react";
 
 import API from "../api/axios";
@@ -20,16 +26,14 @@ const Projects = () => {
 
   const [showForm, setShowForm] = useState(false);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
   });
 
-  useEffect(() => {
-
-    fetchProjects();
-
-  }, []);
+  const submitLock = useRef(false);
 
   const fetchProjects = async () => {
 
@@ -37,7 +41,16 @@ const Projects = () => {
 
       const res = await API.get("/api/projects");
 
-      setProjects(res.data.projects);
+      const uniqueProjects = Array.from(
+        new Map(
+          (res.data.projects || []).map((project) => [
+            project._id,
+            project,
+          ])
+        ).values()
+      );
+
+      setProjects(uniqueProjects);
 
     } catch (error) {
 
@@ -58,6 +71,13 @@ const Projects = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (submitLock.current) {
+      return;
+    }
+
+    submitLock.current = true;
+
+    setIsSubmitting(true);
     try {
 
       await API.post(
@@ -80,8 +100,42 @@ const Projects = () => {
         error.response?.data?.message
       );
 
+    } finally {
+
+      submitLock.current = false;
+
+      setIsSubmitting(false);
     }
   };
+
+  const deleteProject = async (id) => {
+
+    const confirmDelete = window.confirm(
+      "Delete this project?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+
+      await API.delete(
+        `/api/projects/${id}`
+      );
+
+      fetchProjects();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  useEffect(() => {
+
+    fetchProjects();
+
+  }, []);
 
   return (
     <DashboardLayout>
@@ -155,9 +209,10 @@ const Projects = () => {
 
             <button
               type="submit"
-              className="bg-black text-white px-6 py-3 rounded-2xl font-medium"
+              disabled={isSubmitting}
+              className="bg-black text-white px-6 py-3 rounded-2xl font-medium disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Create Project
+              {isSubmitting ? "Creating..." : "Create Project"}
             </button>
 
           </form>
@@ -238,7 +293,7 @@ const Projects = () => {
 
               {/* FOOTER */}
 
-              <div className="mt-8 flex items-center justify-between">
+              <div className="mt-8 space-y-4">
 
                 <div className="flex items-center gap-2 text-zinc-600">
 
@@ -250,15 +305,31 @@ const Projects = () => {
 
                 </div>
 
-                <div className="text-sm text-zinc-500">
-                  by {project.createdBy?.name}
+                <div className="flex items-center justify-between gap-4">
+
+                  <div className="text-sm text-zinc-500">
+                    by {project.createdBy?.name}
+                  </div>
+
+                  {/* {user?.role?.toLowerCase() === "admin" && ( */}
+
+                    <button
+                      onClick={() => deleteProject(project._id)}
+                      className=" flex-shrink-0 h-11 w-11 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition-all cursor-pointer"
+                    >
+
+                      <Trash2 size={18} />
+                      {/* DEL */}
+                    </button>
+
+                  {/* )} */}
+
                 </div>
 
               </div>
-
             </div>
-
           ))}
+
 
         </div>
 
